@@ -16,11 +16,13 @@ spec:
         - name: auth
           image: auth:latest
           env:
-            - name: JWT_KEY
+            - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_KEY
+            - name: JWT_LIFETIME
+              value: "300"
             - name: MONGO_URI
               value: mongodb://auth-mongo-srv.default.svc.cluster.local:27017/authdb
 ---

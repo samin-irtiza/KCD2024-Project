@@ -10,7 +10,7 @@ spec:
   rules:
     - http: 
         paths:
-          - path: /auth
+          - path: /api/v1/
             pathType: Prefix
             backend:
               service:
@@ -19,7 +19,7 @@ spec:
                   number: 3000
           - path: /
             pathType: Prefix
-            defaultBackend:
+            backend:
               service:
                 name: client-srv
                 port:

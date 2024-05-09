@@ -12,7 +12,7 @@ RUN yarn install
 
 # Copy the rest of the application to the working directory
 COPY . .
-
+ENV REACT_APP_URL=/api/v1
 # Build the app
 RUN yarn build
 
