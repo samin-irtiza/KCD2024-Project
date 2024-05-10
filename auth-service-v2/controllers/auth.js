@@ -13,7 +13,18 @@ const { createSpan, tracingError, getActiveParentSpan } = require('../middleware
         const token = user.createJWT();
         childSpan.end();
 
-        res.status(StatusCodes.CREATED).json({
+        const options = {
+            expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
+            httpOnly: true
+        };
+    
+        if (process.env.NODE_ENV === 'production') {
+            options.secure = true;
+        }
+
+        res.status(StatusCodes.CREATED)
+        .cookie('token', token, options)
+        .json({
             user: {
                 email: user.email,
                 lastName: user.lastName,
@@ -61,7 +72,19 @@ const login = async (req, res) => {
     // compare password
     const token = user.createJWT();
 
-    res.status(StatusCodes.OK).json({
+    const options = {
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
+        httpOnly: true
+    };
+
+    if (process.env.NODE_ENV === 'production') {
+        options.secure = true;
+    }
+
+   
+    res.status(StatusCodes.OK) 
+    .cookie('token', token, options)
+    .json({
         user: {
             email: user.email,
             lastName: user.lastName,

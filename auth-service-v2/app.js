@@ -1,6 +1,7 @@
 require('dotenv').config();
 require('express-async-errors');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 // Swagger
 const swaggerUI = require('swagger-ui-express');
@@ -54,6 +55,10 @@ app.set('trust proxy', 1);
 
 app.use(express.static(path.resolve(__dirname, './client/build')));
 app.use(express.json());
+
+// Cookie parser
+app.use(cookieParser());
+
 app.use(helmet());
 
 app.use(xss());
