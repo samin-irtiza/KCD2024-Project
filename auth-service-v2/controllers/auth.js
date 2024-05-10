@@ -2,89 +2,11 @@ const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, UnauthenticatedError } = require('../errors');
 const User = require('../models/User');
 
-// tracing
-const { createSpan, tracingError, getActiveParentSpan } = require('../middleware/custom-tracer');
-    const register = async (req, res) => {
-
-    const span = getActiveParentSpan();
-
-        const childSpan = createSpan('db-call-and-token-creation', span);
-        const user = await User.create({ ...req.body });
-        const token = user.createJWT();
-        childSpan.end();
-
-        const options = {
-            expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
-            httpOnly: true
-        };
-    
-        if (process.env.NODE_ENV === 'production') {
-            options.secure = true;
-        }
-
-        res.status(StatusCodes.CREATED)
-        .cookie('token', token, options)
-        .json({
-            user: {
-                email: user.email,
-                lastName: user.lastName,
-                location: user.location,
-                name: user.name,
-                token,
-            },
-        });
-
-        payload = {
-            'user.email': req.body.email,
-            'url': req.url
-        }
-
-    span.setAttributes(payload);
-    span.end();
-};
-
-const login = async (req, res) => {
-    // const tracer = createTracer('User-AUthentication');
-    const span = getActiveParentSpan(); //createSpan('/login', tracer);
-
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        tracingError(span, 'Please provide email and password');
-        throw new BadRequestError('Please provide email and password');
-    }
-
-    const childSpan = createSpan('db-call-and-token-creation', span);
-    const user = await User.findOne({ email });
-
-    if (!user) {
-        tracingError(childSpan, 'Invalid Credentials');
-        throw new UnauthenticatedError('Invalid Credentials');
-    }
-
-    const isPasswordCorrect = await user.comparePassword(password);
-
-    if (!isPasswordCorrect) {
-        tracingError(childSpan, 'Invalid Credentials');
-        throw new UnauthenticatedError('Invalid Credentials');
-    }
-
-    // compare password
+const register = async (req, res) => {
+    const user = await User.create({ ...req.body });
     const token = user.createJWT();
 
-    const options = {
-        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
-        httpOnly: true
-    };
-
-    if (process.env.NODE_ENV === 'production') {
-        options.secure = true;
-    }
-
-   
-    res.status(StatusCodes.OK) 
-    .cookie('token', token, options)
-    .json({
+    res.status(StatusCodes.CREATED).json({
         user: {
             email: user.email,
             lastName: user.lastName,
@@ -93,13 +15,39 @@ const login = async (req, res) => {
             token,
         },
     });
+};
 
-    childSpan.end();
+const login = async (req, res) => {
+    const { email, password } = req.body;
 
-    // Set attributes to the span.
-    span.setAttribute('user.email', email);
+    if (!email || !password) {
+        throw new BadRequestError('Please provide email and password');
+    }
 
-    span.end();
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new UnauthenticatedError('Invalid Credentials');
+    }
+
+    const isPasswordCorrect = await user.comparePassword(password);
+
+    if (!isPasswordCorrect) {
+        throw new UnauthenticatedError('Invalid Credentials');
+    }
+
+    // compare password
+    const token = user.createJWT();
+
+    res.status(StatusCodes.OK).json({
+        user: {
+            email: user.email,
+            lastName: user.lastName,
+            location: user.location,
+            name: user.name,
+            token,
+        },
+    });
 };
 
 const updateUser = async (req, res) => {
