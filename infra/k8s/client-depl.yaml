@@ -11,12 +11,17 @@ spec:
     metadata:
       labels:
         app: client
+      annotations:
+        # instrumentation.opentelemetry.io/inject-nginx: "true"
     spec:
       containers:
         - name: client
           image: client:latest
           ports:
             - containerPort: 3000
+          env: 
+            - name: REACT_APP_URL
+              value: "/api/v1"
 ---
 apiVersion: v1
 kind: Service
