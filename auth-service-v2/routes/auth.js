@@ -18,6 +18,6 @@ const { createTracer } = require('../middleware/custom-tracer');
 
 router.post('/register', apiLimiter, createTracer('/register'), register);
 router.post('/login', apiLimiter, createTracer('/login'), login);
-router.patch('/updateUser', authenticateUser, testUser, updateUser);
+router.patch('/updateUser', testUser, updateUser);
 
 module.exports = router;
