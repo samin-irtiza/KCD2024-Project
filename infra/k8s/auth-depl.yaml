@@ -25,6 +25,8 @@ spec:
                   key: JWT_KEY
             - name: JWT_LIFETIME
               value: "300"
+            - name: JAEGER_URI
+              value: "http://otel-collector:4317"
             - name: MONGO_URI
               value: mongodb://auth-mongo-srv.default.svc.cluster.local:27017/authdb
 ---
