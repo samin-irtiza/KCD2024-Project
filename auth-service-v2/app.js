@@ -14,10 +14,6 @@ const path = require('path');
 const helmet = require('helmet');
 const xss = require('xss-clean');
 
-// tracer
-
-const tracer = require('./tracer');
-tracer('auth-service');
 
 const express = require('express');
 const app = express();
@@ -33,7 +29,6 @@ const jobRouter = require('./routes/jobs');
 // error handler
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
-const { createTracer } = require('./middleware/custom-tracer');
 const { getAllPosts } = require('./controllers/jobs');
 
 app.set('trust proxy', 1);
@@ -89,7 +84,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //     span.end();
 // });
 
-app.get('/get-posts', createTracer('/get-posts'), getAllPosts);
+app.get('/get-posts', getAllPosts);
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/jobs', jobRouter);

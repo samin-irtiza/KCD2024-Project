@@ -11,9 +11,8 @@ const {
     showStats,
     getAllPosts
 } = require('../controllers/jobs');
-const { createTracer } = require('../middleware/custom-tracer');
 
-router.route('/').post(createJob).get(createTracer('/get-posts'), getAllPosts);
+router.route('/').post(createJob).get(getAllPosts);
 router.route('/stats').get(showStats);
 
 router
