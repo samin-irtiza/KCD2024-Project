@@ -17,7 +17,7 @@ router.route('/stats').get(showStats);
 
 router
     .route('/:id')
-    .get(createTracer('/get-post'), getJob)
+    .get(getJob)
     .patch(testUser, updateJob)
     .delete(testUser, deleteJob);
 
