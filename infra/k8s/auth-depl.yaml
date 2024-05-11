@@ -11,8 +11,6 @@ spec:
     metadata:
       labels:
         app: auth
-      annotations:
-        instrumentation.opentelemetry.io/inject-nodejs: "true"
     spec:
       containers:
         - name: auth
