@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const moment = require('moment');
 const axios =  require('axios');
-const { trace, context, propagation } = require('@opentelemetry/api');
 
 const { StatusCodes } = require('http-status-codes');
 const { NotFoundError } = require('../errors/not-found');
@@ -9,7 +8,6 @@ const { NotFoundError } = require('../errors/not-found');
 const Job = require('../models/Job');
 
 const getAllPosts = async (req, res) => {
-    const parentSpan = trace.getSpan(context.active());
 
     try{
         const user = req.user;
@@ -19,29 +17,15 @@ const getAllPosts = async (req, res) => {
         //     email: 'user@mail.com'
         // };
 
-        if(parentSpan && req.user) {
-            parentSpan.setAttribute('user.id', user);
-        }
-
         const validateResponse = await context.with(
-            trace.setSpan(context.active(), parentSpan),
             async() => {
-                const carrier = {};
-                propagation.inject(context.active(), carrier); 
-                parentSpan.end();
-                return axios.get(process.env.BACKEND_SERVICE_2, {
-                    headers: carrier
-                });
+                return axios.get(process.env.BACKEND_SERVICE_2);
             }
         );
 
         res.json(validateResponse.data);
     } catch(e) {
         console.log("Error:", e.message)
-        if(parentSpan) {
-            // console.log(parentSpan)
-            parentSpan.recordException(e)
-        }
         return;
     }
 };
@@ -99,8 +83,6 @@ const getAllJobs = async (req, res) => {
 
 const getJob = async (req, res) => {
     const { user: { userId }, params: { id: jobId } } = req;
-
-    const parentSpan = trace.getSpan(context.active()); 
 
     const job = await Job.findOne({
         _id: jobId,
